@@ -20,11 +20,20 @@ class TestReview:
         '''can be added to a transaction and committed to review table with comment column.'''
         with app.app_context():
             assert 'comment' in Review.__table__.columns
-            r = Review(comment='great!')
-            db.session.add(r)
+
+            customer = Customer(name='Alice')
+            item = Item(name='Book', price=19.99)
+            db.session.add_all([customer, item])
             db.session.commit()
-            assert hasattr(r, 'id')
-            assert db.session.query(Review).filter_by(id=r.id).first()
+
+
+            review = Review(comment='Excellent read!', customer_id=customer.id, item_id=item.id)
+            db.session.add(review)
+            db.session.commit()
+
+            assert review.id is not None
+            assert  review.customer == customer
+            assert review.item == item
 
     def test_is_related_to_customer_and_item(self):
         '''has foreign keys and relationships'''
